@@ -13,8 +13,6 @@ WIDTH, HEIGHT = 800, 800
 # Initialize Pygame
 pygame.init()
 
-# load mower image
-image = pygame.image.load('./assets/images/mower.svg')
 
 
 # Set up the game window
