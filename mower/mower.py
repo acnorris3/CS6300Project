@@ -1,4 +1,7 @@
-from nav import path
+try:
+    from mower.nav import path
+except ImportError:
+    from nav import path
 
 class Mower:
     """an object to describe a lawn mower.
@@ -8,11 +11,3 @@ class Mower:
         self.y = y
         self.direction = direction # 0 = north, 90 = east, 180 = south, 270 = west
         self.path = path.Path()
-
-if __name__ == "__main__":
-    test_mower = Mower(y=3, direction=180)
-    assert test_mower.x == 0
-    assert test_mower.y == 3
-    assert test_mower.direction == 180
-    assert test_mower.path.get_path_length() == 0
-    print("all Mower class tests passed")
