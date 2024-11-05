@@ -83,3 +83,14 @@ Yeah for sure! Please refer to `./simulation/test_simulationEngine.py` and `./si
 - Click tab titled "Previous Iteration"
 - Shows all tasks that have been assigned to the prevous sprint.
 - Can see what was completed, who it was assigned to, how long the task was estimated to take vs how long it actually took.
+
+
+## Documentation
+
+To avoid this README from growing too much there is now a folder where specifc information can now be found.
+Like this [doc](/docs/how-to-add-pics.md) on how to add pictures to readme files.
+
+
+## Basic info about pygame and our specific use case of it.
+
+Please take a look at this [doc](/docs/pygame_basics.md)
