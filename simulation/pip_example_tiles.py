@@ -34,7 +34,7 @@ class PIP_Example_Tiles:
         self.pos = (0, 0)
 
     # Update position of the mower and update the status of the lawn
-    def update_grid():
+    def update_grid(self):
         if self.grid[self.pos[0]][self.pos[1]] == LawnState.UNMOWED:
             self.grid[self.pos[0]][self.pos[1]] = LawnState.MOWED
             

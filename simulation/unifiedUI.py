@@ -14,6 +14,15 @@ GRAY = (200, 200, 200)
 # Initialize Pygame
 pygame.init()
 class UnifiedUI:
+    """
+    UnifiedUI is a class that wraps together the game and GUI components.
+    Creates a window with a game screen on the top left and a menu along the bottom and right.
+    The game screen currently contains a lawn and a mower.
+    :param screen_width: The width of the window in pixels.
+    :param screen_height: The height of the window in pixels.
+    :param width_ratio: The fraction of the window width allocated to the game screen.
+    :param height_ratio: The fraction of the window height allocated to the game screen.
+    """
     def __init__(self, screen_width=800, screen_height=600, width_ratio=0.75, height_ratio=0.8):
         # Component objects
         self.game_screen = PIP_Example_Tiles(screen_width * width_ratio, screen_height * height_ratio) # THIS IS MODULAR, you may load different games here.
@@ -38,6 +47,26 @@ class UnifiedUI:
 
 
     def main_loop(self): # Main game loop
+        """
+        Main game loop that handles events, updates, and rendering for the lawn mower simulation.
+
+        The loop continuously processes user inputs, updates the game state, and renders the 
+        game and GUI surfaces to the display until a quit event is detected or the mower 
+        returns to the home position.
+
+        Event Handling:
+        - Exits the loop if a quit event is received from the window or the 'Quit' button is pressed.
+        - Processes keyboard inputs to control the mower, and checks if the mower has returned home.
+        - Handles button presses from the GUI, delegating specific actions to other methods.
+
+        Rendering:
+        - Updates the game surface by drawing the current state of the lawn.
+        - Clears and redraws the GUI surface.
+        - Combines the game and GUI surfaces onto the main screen.
+        - Refreshes the display with updated content using pygame.display.flip().
+
+        This function will terminate the program by calling pygame.quit() once the loop ends.
+        """
         running = True
         while running:
             # Event handling (stub)
@@ -47,6 +76,7 @@ class UnifiedUI:
                     running = False
                 if event.type == pygame.KEYDOWN:
                     self.game_screen.handle_keypress(event)
+                    self.game_screen.update_grid()
                     if self.game_screen.mower_has_returned_home():
                         running = False
                 if event.type == pygame_gui.UI_BUTTON_PRESSED:
