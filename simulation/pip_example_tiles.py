@@ -35,12 +35,28 @@ class PIP_Example_Tiles:
 
     # Update position of the mower and update the status of the lawn
     def update_grid(self):
+        """
+        Update the grid based on the current position of the mower.
+
+        If the current position of the mower is on an unmowed lawn cell, 
+        change the state of that cell to mowed.
+        """
         if self.grid[self.pos[0]][self.pos[1]] == LawnState.UNMOWED:
             self.grid[self.pos[0]][self.pos[1]] = LawnState.MOWED
             
 
     # Draw the lawn
     def draw_lawn(self, screen):
+        """
+        Draw the lawn onto the given screen.
+
+        This function goes through each cell in the grid, and based on the state of the cell,
+        draws a rectangle of the appropriate color onto the screen. The mower's position is
+        drawn as red, unmowed lawn is drawn as dark green, mowed lawn is light green, trees
+        are yellow, rocks are brown, concrete is grey, and the base is blue.
+
+        :param screen: The surface to draw the lawn onto. At time of writing, this should be defined in a UnifiedUI object.
+        """
         screen.fill(colors["white"])
         for row_index, row in enumerate(self.grid):
             for col_index, cell in enumerate(row):
@@ -64,6 +80,18 @@ class PIP_Example_Tiles:
                 pygame.draw.rect(screen, color, (col_index * self.cell_width, row_index * self.cell_height, self.cell_width, self.cell_height))
 
     def handle_keypress(self, event):
+        """
+        Handles keypress events.
+
+        This function updates the position of the mower based on user input from the keyboard.
+        The mower can move up, down, left, or right if the corresponding key is pressed.
+        Checks for valid destination of the mower.
+
+        If the mower has left the base, it keeps track of that fact.
+
+        :param event: The event object passed in from the event loop.
+        :return: None
+        """
         if (event.key == pygame.K_UP or event.key == pygame.K_w) and (self.pos[0] > 0):
             # Move mower up if not at the top edge
             self.pos = (self.pos[0] - 1, self.pos[1])
@@ -85,6 +113,12 @@ class PIP_Example_Tiles:
             self.fLeftStart = True
 
     def mower_has_returned_home(self) -> bool:
+        """
+        Returns True if the mower has previously left and is now back at the base, indicating the simulation should end;
+        otherwise, it returns False.
+
+        :return: A boolean indicating if the mower has returned to the base.
+        """
         if self.fLeftStart and (self.pos == (0, 0)):
             # Mower has returned to the base, end the simulation
             return True

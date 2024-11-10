@@ -5,9 +5,18 @@ import pygame_gui
 
 class menuScreen:
     def __init__(self, screen_width=800, screen_height=600, width_ratio=0.75, height_ratio=0.8):
-        """Sets up the Pygame GUI elements but does not start the main loop."""
+        """
+        Initializes the menuScreen class with the specified screen dimensions and layout configuration.
 
-        # Declare GUI elements - can be called by downstream consumers
+        This constructor sets up the Pygame display window and initializes the GUI manager. It also
+        defines the layout for the bottom and right button areas, creating buttons with specified
+        labels and adding them to their respective lists for later access by downstream consumers.
+
+        :param screen_width: The width of the screen in pixels.
+        :param screen_height: The height of the screen in pixels.
+        :param width_ratio: The fraction of the screen width allocated to the main display area.
+        :param height_ratio: The fraction of the screen height allocated to the main display area.
+        """
         self.screen_width = screen_width
         self.screen_height = screen_height
         self.width_ratio = width_ratio
@@ -84,18 +93,14 @@ class menuScreen:
         pygame.quit()
 
     def draw_menu(self, gui_surface):
-        # for event in pygame.event.get():
-        #     if event.type == pygame.QUIT:
-        #         running = False
+        """
+        Draws the menu onto the given surface, which should be a Pygame Surface created with the SRCALPHA flag.
 
-        #     # Check if a button is pressed
-        #     if event.type == pygame_gui.UI_BUTTON_PRESSED:
-        #         if event.ui_element == self.buttons_bottom[3]:  # Quit button was pressed
-        #             running = False  # Close the program
+        The method first clears the surface with a transparent fill, then draws the grey backgrounds for the bottom and right buttons.
+        Finally, it updates the Pygame GUI manager and draws the buttons onto the surface.
 
-        #     # Pass events to Pygame GUI manager
-        #     self.ui_manager.process_events(event)
-
+        :param gui_surface: A Pygame Surface (with the SRCALPHA flag set).
+        """
         gui_surface.fill((0, 0, 0, 0))  # Clear with transparency
         # gray background for bottom buttons
         pygame.draw.rect(gui_surface, (150, 150, 150), (0,

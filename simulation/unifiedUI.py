@@ -26,7 +26,7 @@ class UnifiedUI:
     def __init__(self, screen_width=800, screen_height=600, width_ratio=0.75, height_ratio=0.8):
         # Component objects
         self.game_screen = PIP_Example_Tiles(screen_width * width_ratio, screen_height * height_ratio) # THIS IS MODULAR, you may load different games here.
-        self.menu_screen = menuScreen(screen_width, screen_height)
+        self.menu_screen = menuScreen(screen_width, screen_height, width_ratio, height_ratio)
 
         # Screen dimensions
         self.WIDTH = screen_width
