@@ -4,12 +4,14 @@ import pygame
 import pygame_gui
 
 class menuScreen:
-    def __init__(self, screen_width=800, screen_height=600):
+    def __init__(self, screen_width=800, screen_height=600, width_ratio=0.75, height_ratio=0.8):
         """Sets up the Pygame GUI elements but does not start the main loop."""
 
         # Declare GUI elements - can be called by downstream consumers
         self.screen_width = screen_width
         self.screen_height = screen_height
+        self.width_ratio = width_ratio
+        self.height_ratio = height_ratio
         pygame.init()
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
         self.ui_manager = pygame_gui.UIManager((self.screen_width, self.screen_height))
@@ -54,7 +56,8 @@ class menuScreen:
 
 
     def run_menu_screen_loop(self):
-        """Runs the main event loop for the menu self.screen."""
+        """ THIS METHOD IS NOW DEPRECATED. Instead, please call draw_menu() from the main loop.
+        Runs the main event loop for the menu self.screen."""
         clock = pygame.time.Clock()
         running = True
 
@@ -79,3 +82,32 @@ class menuScreen:
             pygame.display.flip()
 
         pygame.quit()
+
+    def draw_menu(self, gui_surface):
+        # for event in pygame.event.get():
+        #     if event.type == pygame.QUIT:
+        #         running = False
+
+        #     # Check if a button is pressed
+        #     if event.type == pygame_gui.UI_BUTTON_PRESSED:
+        #         if event.ui_element == self.buttons_bottom[3]:  # Quit button was pressed
+        #             running = False  # Close the program
+
+        #     # Pass events to Pygame GUI manager
+        #     self.ui_manager.process_events(event)
+
+        gui_surface.fill((0, 0, 0, 0))  # Clear with transparency
+        # gray background for bottom buttons
+        pygame.draw.rect(gui_surface, (150, 150, 150), (0,
+                                                        self.screen_height * self.height_ratio,
+                                                        self.screen_width,
+                                                        self.screen_height * (1 - self.height_ratio)))
+        # gray background for right buttons
+        pygame.draw.rect(gui_surface, (150, 150, 150), (self.screen_width * self.width_ratio,
+                                                        0, 
+                                                        self.screen_width * (1 - self.width_ratio),
+                                                        self.screen_height))
+        # draw buttons
+        self.ui_manager.update(0)
+        self.ui_manager.draw_ui(gui_surface)
+        pygame.display.flip()
