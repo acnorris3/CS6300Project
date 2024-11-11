@@ -4,12 +4,23 @@ import pygame
 import pygame_gui
 
 class menuScreen:
-    def __init__(self, screen_width=800, screen_height=600):
-        """Sets up the Pygame GUI elements but does not start the main loop."""
+    def __init__(self, screen_width=800, screen_height=600, width_ratio=0.75, height_ratio=0.8):
+        """
+        Initializes the menuScreen class with the specified screen dimensions and layout configuration.
 
-        # Declare GUI elements - can be called by downstream consumers
+        This constructor sets up the Pygame display window and initializes the GUI manager. It also
+        defines the layout for the bottom and right button areas, creating buttons with specified
+        labels and adding them to their respective lists for later access by downstream consumers.
+
+        :param screen_width: The width of the screen in pixels.
+        :param screen_height: The height of the screen in pixels.
+        :param width_ratio: The fraction of the screen width allocated to the main display area.
+        :param height_ratio: The fraction of the screen height allocated to the main display area.
+        """
         self.screen_width = screen_width
         self.screen_height = screen_height
+        self.width_ratio = width_ratio
+        self.height_ratio = height_ratio
         pygame.init()
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
         self.ui_manager = pygame_gui.UIManager((self.screen_width, self.screen_height))
@@ -54,7 +65,8 @@ class menuScreen:
 
 
     def run_menu_screen_loop(self):
-        """Runs the main event loop for the menu self.screen."""
+        """ THIS METHOD IS NOW DEPRECATED. Instead, please call draw_menu() from the main loop.
+        Runs the main event loop for the menu self.screen."""
         clock = pygame.time.Clock()
         running = True
 
@@ -79,3 +91,28 @@ class menuScreen:
             pygame.display.flip()
 
         pygame.quit()
+
+    def draw_menu(self, gui_surface):
+        """
+        Draws the menu onto the given surface, which should be a Pygame Surface created with the SRCALPHA flag.
+
+        The method first clears the surface with a transparent fill, then draws the grey backgrounds for the bottom and right buttons.
+        Finally, it updates the Pygame GUI manager and draws the buttons onto the surface.
+
+        :param gui_surface: A Pygame Surface (with the SRCALPHA flag set).
+        """
+        gui_surface.fill((0, 0, 0, 0))  # Clear with transparency
+        # gray background for bottom buttons
+        pygame.draw.rect(gui_surface, (150, 150, 150), (0,
+                                                        self.screen_height * self.height_ratio,
+                                                        self.screen_width,
+                                                        self.screen_height * (1 - self.height_ratio)))
+        # gray background for right buttons
+        pygame.draw.rect(gui_surface, (150, 150, 150), (self.screen_width * self.width_ratio,
+                                                        0, 
+                                                        self.screen_width * (1 - self.width_ratio),
+                                                        self.screen_height))
+        # draw buttons
+        self.ui_manager.update(0)
+        self.ui_manager.draw_ui(gui_surface)
+        pygame.display.flip()
