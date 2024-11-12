@@ -76,7 +76,7 @@ class UnifiedUI:
                     running = False
                 if event.type == pygame.KEYDOWN:
                     self.game_screen.handle_keypress(event)
-                    self.game_screen.update_grid()
+                    # self.game_screen.update_grid()
                     if self.game_screen.mower_has_returned_home():
                         running = False
                 if event.type == pygame_gui.UI_BUTTON_PRESSED:

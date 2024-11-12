@@ -1,5 +1,5 @@
 class Metrics:
-    def __init__(self, squares_per_battery=50, total_squares_in_lawn=100):
+    def __init__(self, squares_per_battery=100, total_squares_in_lawn=100):
         """
         Initialize the metrics object with default values.
 
