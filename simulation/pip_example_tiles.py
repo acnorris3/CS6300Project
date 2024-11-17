@@ -53,6 +53,13 @@ class PIP_Example_Tiles:
 
             
     def check_collision(self, new_position):
+        """
+        Check if the mower has collided with an object on the lawn.
+
+        :param new_position: The new position of the mower.
+        :return: True if the mower has collided with an object, False otherwise.
+        """
+        
         row, col = new_position
         if self.grid.get_tile(col, row) in [LawnState.TREE, LawnState.ROCK]:
             print('Collision!')
@@ -61,6 +68,12 @@ class PIP_Example_Tiles:
         return False
     
     def move_mower(self, direction):
+        """
+        Move the mower in the given direction, if a valid move.
+
+        :param direction: The direction in which the mower should move."""
+        new_position = self.pos 
+
         if direction == 'UP' and self.pos[0] > 0:
             new_position = (self.pos[0] - 1, self.pos[1])
         elif direction == 'DOWN' and self.pos[0] < self.rows - 1:
@@ -69,8 +82,9 @@ class PIP_Example_Tiles:
             new_position = (self.pos[0], self.pos[1] - 1)
         elif direction == 'RIGHT' and self.pos[1] < self.cols - 1:
             new_position = (self.pos[0], self.pos[1] + 1)
-            
-        if not self.check_collision(new_position):
+        
+
+        if new_position != self.pos and not self.check_collision(new_position):
             self.update_grid(new_position)
             self.pos = new_position
 
