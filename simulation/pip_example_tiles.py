@@ -9,6 +9,7 @@ except ImportError:
 from lawn.lawn_states import LawnState
 import csv
 from mower.metrics.Metrics import Metrics
+from lawn.lawn import Lawn
 
 class PIP_Example_Tiles:
     """The file /simulation/example_tiles.py, but modified to be compatible with the PIP version of the simulation."""
@@ -20,13 +21,10 @@ class PIP_Example_Tiles:
         self.fLeftStart = False # Keep track if mower has left the base
 
         # Load the lawn from CSV file
-        self.grid = []
-        with open('./lawn/example_lawn_1.csv', 'r') as f:
-            reader = csv.reader(f)
-            for row in reader:
-                self.grid.append([LawnState(int(cell)) for cell in row])
-        self.rows = len(self.grid)
-        self.cols = len(self.grid[0])
+        self.grid = Lawn()
+        self.grid.load_from_file('./lawn/example_lawn_1.csv')
+        self.rows = self.grid.height
+        self.cols = self.grid.width
 
         # Set width and height of the cells in the grid
         self.cell_width = self.WIDTH // self.cols
@@ -45,18 +43,18 @@ class PIP_Example_Tiles:
         """
         row, col = new_position
         
-        if self.grid[row][col] == LawnState.UNMOWED:
-            self.grid[row][col] = LawnState.MOWED
-            if (self.grid[row][col] != LawnState.BASE):
+        if self.grid.get_tile(col, row) == LawnState.UNMOWED:
+            self.grid.update_tile(col, row, LawnState.MOWED)
+            if (self.grid.get_tile(col, row) != LawnState.BASE):
                 self.metrics.add_mowed()
         else:
-            if (self.grid[row][col] != LawnState.BASE):
+            if (self.grid.get_tile(col, row) != LawnState.BASE):
                 self.metrics.add_overlap()
 
             
     def check_collision(self, new_position):
         row, col = new_position
-        if self.grid[row][col] in [LawnState.TREE, LawnState.ROCK]:
+        if self.grid.get_tile(col, row) in [LawnState.TREE, LawnState.ROCK]:
             print('Collision!')
             self.metrics.add_collision()
             return True
@@ -89,7 +87,7 @@ class PIP_Example_Tiles:
         :param screen: The surface to draw the lawn onto. At time of writing, this should be defined in a UnifiedUI object.
         """
         screen.fill(colors["white"])
-        for row_index, row in enumerate(self.grid):
+        for row_index, row in enumerate(self.grid.raw):
             for col_index, cell in enumerate(row):
                 if (row_index, col_index) == self.pos:
                     color = colors["red"]
