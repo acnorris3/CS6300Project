@@ -18,9 +18,14 @@ pygame.init()
 ASSET_PATH = "./assets/"
 
 class MowerSprite(pygame.sprite.Sprite):
-    def __init__(self, image_path, pos):
+    def __init__(self, image_path, pos, width, height):
         super().__init__()
-        self.image = pygame.image.load(image_path).convert_alpha()
+
+        # Load image and scale to the specified tile size
+        original_image = pygame.image.load(image_path).convert_alpha()
+        self.image = pygame.transform.scale(original_image, (width, height))
+
+        # Position of the mower
         self.rect = self.image.get_rect(topleft=pos)
 
     def update_position(self, new_pos):
@@ -47,16 +52,41 @@ class PIP_Example_Tiles(AbstractGameScreen):
         self.cell_width = self.WIDTH // self.cols
         self.cell_height = self.HEIGHT // self.rows
 
-        # Load sprites for lawn tiles and mower
+        # Load sprites for lawn tiles and mower, and scale them to fit each tile
         self.tile_sprites = {
-            LawnState.UNMOWED: pygame.image.load(os.path.join(ASSET_PATH, "unmowed.png")).convert_alpha(),
-            LawnState.MOWED: pygame.image.load(os.path.join(ASSET_PATH, "mowed.png")).convert_alpha(),
-            LawnState.TREE: pygame.image.load(os.path.join(ASSET_PATH, "tree.png")).convert_alpha(),
-            LawnState.ROCK: pygame.image.load(os.path.join(ASSET_PATH, "rock.png")).convert_alpha(),
-            LawnState.CONCRETE: pygame.image.load(os.path.join(ASSET_PATH, "concrete.png")).convert_alpha(),
-            LawnState.BASE: pygame.image.load(os.path.join(ASSET_PATH, "base.png")).convert_alpha(),
+            LawnState.UNMOWED: pygame.transform.scale(
+                pygame.image.load(os.path.join(ASSET_PATH, "unmowed.png")).convert_alpha(),
+                (self.cell_width, self.cell_height)
+            ),
+            LawnState.MOWED: pygame.transform.scale(
+                pygame.image.load(os.path.join(ASSET_PATH, "mowed.png")).convert_alpha(),
+                (self.cell_width, self.cell_height)
+            ),
+            LawnState.TREE: pygame.transform.scale(
+                pygame.image.load(os.path.join(ASSET_PATH, "tree.png")).convert_alpha(),
+                (self.cell_width, self.cell_height)
+            ),
+            LawnState.ROCK: pygame.transform.scale(
+                pygame.image.load(os.path.join(ASSET_PATH, "rock.png")).convert_alpha(),
+                (self.cell_width, self.cell_height)
+            ),
+            LawnState.CONCRETE: pygame.transform.scale(
+                pygame.image.load(os.path.join(ASSET_PATH, "concrete.png")).convert_alpha(),
+                (self.cell_width, self.cell_height)
+            ),
+            LawnState.BASE: pygame.transform.scale(
+                pygame.image.load(os.path.join(ASSET_PATH, "base.png")).convert_alpha(),
+                (self.cell_width, self.cell_height)
+            ),
         }
-        self.mower_sprite = MowerSprite(os.path.join(ASSET_PATH, "mower.png"), (0, 0))
+
+        # Load and scale mower sprite
+        self.mower_sprite = MowerSprite(
+        os.path.join(ASSET_PATH, "mower.png"),
+        (0, 0),
+        self.cell_width,
+        self.cell_height
+        )
 
         # Position of the mower
         self.pos = (0, 0)
