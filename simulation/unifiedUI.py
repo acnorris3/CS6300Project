@@ -1,11 +1,5 @@
 import pygame
 import pygame_gui
-try:
-    from menuScreen import menuScreen
-    from pip_example_tiles import PIP_Example_Tiles
-except ImportError:
-    from simulation.menuScreen import menuScreen
-    from simulation.pip_example_tiles import PIP_Example_Tiles
 # Define colors (stub)
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -23,10 +17,10 @@ class UnifiedUI:
     :param width_ratio: The fraction of the window width allocated to the game screen.
     :param height_ratio: The fraction of the window height allocated to the game screen.
     """
-    def __init__(self, screen_width=800, screen_height=600, width_ratio=0.75, height_ratio=0.8):
+    def __init__(self, game_instance, menu_instance, screen_width=800, screen_height=600, width_ratio=0.75, height_ratio=0.8):
         # Component objects
-        self.game_screen = PIP_Example_Tiles(screen_width * width_ratio, screen_height * height_ratio) # THIS IS MODULAR, you may load different games here.
-        self.menu_screen = menuScreen(screen_width, screen_height, width_ratio, height_ratio)
+        self.game_screen = game_instance(screen_width * width_ratio, screen_height * height_ratio) # THIS IS MODULAR, you may load different games here.
+        self.menu_screen = menu_instance(screen_width, screen_height, width_ratio, height_ratio)
 
         # Screen dimensions
         self.WIDTH = screen_width
@@ -76,7 +70,7 @@ class UnifiedUI:
                     running = False
                 if event.type == pygame.KEYDOWN:
                     self.game_screen.handle_keypress(event)
-                    # self.game_screen.update_grid()
+                    # self.game_screen.update_lawn()
                     if self.game_screen.mower_has_returned_home():
                         running = False
                 if event.type == pygame_gui.UI_BUTTON_PRESSED:

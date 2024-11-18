@@ -1,17 +1,20 @@
-import pygame
-import sys
 import os
+import sys
+import pygame
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 try:
     from colors import colors
+    from game_screen.abstract_game_screen import AbstractGameScreen
 except ImportError:
     from simulation.colors import colors
-from lawn.lawn_states import LawnState
+    from simulation.game_screen.abstract_game_screen import AbstractGameScreen
 import csv
-from mower.metrics.Metrics import Metrics
 from lawn.lawn import Lawn
+from lawn.lawn_states import LawnState
+from mower.metrics.Metrics import Metrics
 
-class PIP_Example_Tiles:
+
+class PIP_Example_Tiles(AbstractGameScreen):
     """The file /simulation/example_tiles.py, but modified to be compatible with the PIP version of the simulation."""
     def __init__(self, width=800, height=800):
         self.WIDTH = width
@@ -34,7 +37,7 @@ class PIP_Example_Tiles:
         self.pos = (0, 0)
 
     # Update position of the mower and update the status of the lawn
-    def update_grid(self, new_position):
+    def update_lawn(self, new_position):
         """
         Update the grid based on the current position of the mower.
 
@@ -85,7 +88,7 @@ class PIP_Example_Tiles:
         
 
         if new_position != self.pos and not self.check_collision(new_position):
-            self.update_grid(new_position)
+            self.update_lawn(new_position)
             self.pos = new_position
 
     # Draw the lawn
