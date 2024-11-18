@@ -45,6 +45,17 @@ class PIP_Example_Tiles(AbstractGameScreen):
         self.cell_width = self.WIDTH // self.cols
         self.cell_height = self.HEIGHT // self.rows
 
+        # Load sprites for lawn tiles and mower
+        self.tile_sprites = {
+            LawnState.UNMOWED: pygame.image.load(os.path.join(ASSET_PATH, "unmowed.png")).convert_alpha(),
+            LawnState.MOWED: pygame.image.load(os.path.join(ASSET_PATH, "mowed.png")).convert_alpha(),
+            LawnState.TREE: pygame.image.load(os.path.join(ASSET_PATH, "tree.png")).convert_alpha(),
+            LawnState.ROCK: pygame.image.load(os.path.join(ASSET_PATH, "rock.png")).convert_alpha(),
+            LawnState.CONCRETE: pygame.image.load(os.path.join(ASSET_PATH, "concrete.png")).convert_alpha(),
+            LawnState.BASE: pygame.image.load(os.path.join(ASSET_PATH, "base.png")).convert_alpha(),
+        }
+        self.mower_sprite = MowerSprite(os.path.join(ASSET_PATH, "mower.png"), (0, 0))
+
         # Position of the mower
         self.pos = (0, 0)
 
