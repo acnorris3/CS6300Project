@@ -130,24 +130,12 @@ class PIP_Example_Tiles(AbstractGameScreen):
         screen.fill(colors["white"])
         for row_index, row in enumerate(self.grid.raw):
             for col_index, cell in enumerate(row):
-                if (row_index, col_index) == self.pos:
-                    color = colors["red"]
-                elif cell == LawnState.UNMOWED:
-                    color = colors["dark_green"]
-                elif cell == LawnState.MOWED:
-                    color = colors["light_green"]
-                elif cell == LawnState.TREE:
-                    color = colors["yellow"]
-                elif cell == LawnState.ROCK:
-                    color = colors["brown"]
-                elif cell == LawnState.CONCRETE:
-                    color = colors["grey"]
-                elif cell == LawnState.BASE:
-                    color = colors["blue"]
-                else:
-                    color = colors["black"]
+                tile_sprite = self.tile_sprites.get(cell, None)
+                if tile_sprite:
+                    screen.blit(tile_sprite, (col_index * self.cell_width, row_index * self.cell_height))
 
-                pygame.draw.rect(screen, color, (col_index * self.cell_width, row_index * self.cell_height, self.cell_width, self.cell_height))
+        # Draw the mower sprite on top of the grid
+        screen.blit(self.mower_sprite.image, self.mower_sprite.rect)
 
     def handle_keypress(self, event):
         """
