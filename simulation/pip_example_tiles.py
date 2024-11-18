@@ -113,8 +113,9 @@ class PIP_Example_Tiles(AbstractGameScreen):
         if new_position != self.pos and not self.check_collision(new_position):
             self.update_lawn(new_position)
             self.pos = new_position
+            # Update mower sprite's position
+            self.mower_sprite.update_position((new_position[1] * self.cell_width, new_position[0] * self.cell_height))
 
-    # Draw the lawn
     def draw_lawn(self, screen):
         """
         Draw the lawn onto the given screen.
