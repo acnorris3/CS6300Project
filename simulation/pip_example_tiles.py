@@ -13,6 +13,18 @@ from lawn.lawn import Lawn
 from lawn.lawn_states import LawnState
 from mower.metrics.Metrics import Metrics
 
+# Initialize Pygame and set up asset paths
+pygame.init()
+ASSET_PATH = "./assets/"
+
+class MowerSprite(pygame.sprite.Sprite):
+    def __init__(self, image_path, pos):
+        super().__init__()
+        self.image = pygame.image.load(image_path).convert_alpha()
+        self.rect = self.image.get_rect(topleft=pos)
+
+    def update_position(self, new_pos):
+        self.rect.topleft = new_pos
 
 class PIP_Example_Tiles(AbstractGameScreen):
     """The file /simulation/example_tiles.py, but modified to be compatible with the PIP version of the simulation."""
