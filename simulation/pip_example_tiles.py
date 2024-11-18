@@ -29,6 +29,8 @@ class MowerSprite(pygame.sprite.Sprite):
 class PIP_Example_Tiles(AbstractGameScreen):
     """The file /simulation/example_tiles.py, but modified to be compatible with the PIP version of the simulation."""
     def __init__(self, width=800, height=800):
+        pygame.display.set_mode((width, height))  # Create display first
+
         self.WIDTH = width
         self.HEIGHT = height
         self.metrics = Metrics()
