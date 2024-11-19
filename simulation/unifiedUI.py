@@ -1,5 +1,6 @@
 import pygame
 import pygame_gui
+import time
 # Define colors (stub)
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -40,6 +41,30 @@ class UnifiedUI:
         self.gui_surface = pygame.Surface(window_size, pygame.SRCALPHA)  # Supports transparency
 
 
+    def start_move(self, key):
+        event = pygame.event.Event(pygame.KEYDOWN, key=key)
+        pygame.event.post(event)
+        time.sleep(0.25)
+
+    def auto_move(self):
+        #print(self.game_screen.pos)
+        if self.game_screen.check_lawn(self.game_screen.pos[0], self.game_screen.pos[1] + 1) and self.game_screen.pos[1] < self.game_screen.cols - 1:
+            self.start_move(pygame.K_d)
+        elif self.game_screen.check_lawn(self.game_screen.pos[0] + 1, self.game_screen.pos[1]) and self.game_screen.pos[0] < self.game_screen.rows - 1:
+            self.start_move(pygame.K_s)
+        elif self.game_screen.check_lawn(self.game_screen.pos[0], self.game_screen.pos[1] - 1) and self.game_screen.pos[1] > - 1:
+            self.start_move(pygame.K_a)
+        elif self.game_screen.check_lawn(self.game_screen.pos[0] - 1, self.game_screen.pos[1]) and self.game_screen.pos[0] > -1:
+            self.start_move(pygame.K_w)
+        # TODO: Have default movements be based on home position
+        elif self.game_screen.check_entire_lawn:
+            if self.game_screen.pos[0] > 0:
+                self.start_move(pygame.K_w)
+            elif self.game_screen.pos[1] > 0:
+                self.start_move(pygame.K_a)      
+
+
+
     def main_loop(self): # Main game loop
         """
         Main game loop that handles events, updates, and rendering for the lawn mower simulation.
@@ -67,12 +92,13 @@ class UnifiedUI:
             for event in pygame.event.get():
                 # CHECK FOR QUIT
                 if event.type == pygame.QUIT:
-                    running = False
-                if event.type == pygame.KEYDOWN:
+                    running = False                                  
+                if event.type == pygame.KEYDOWN:                                  
                     self.game_screen.handle_keypress(event)
+                    self.auto_move()
                     # self.game_screen.update_lawn()
                     if self.game_screen.mower_has_returned_home():
-                        running = False
+                        running = False 
                 if event.type == pygame_gui.UI_BUTTON_PRESSED:
                     if event.ui_element == self.menu_screen.buttons_bottom[3]:  # Quit button was pressed
                         running = False

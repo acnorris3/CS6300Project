@@ -13,10 +13,29 @@ from lawn.lawn import Lawn
 from lawn.lawn_states import LawnState
 from mower.metrics.Metrics import Metrics
 
+# Initialize Pygame and set up asset paths
+pygame.init()
+ASSET_PATH = "./assets/"
+
+class MowerSprite(pygame.sprite.Sprite):
+    def __init__(self, image_path, pos, width, height):
+        super().__init__()
+
+        # Load image and scale to the specified tile size
+        original_image = pygame.image.load(image_path).convert_alpha()
+        self.image = pygame.transform.scale(original_image, (width, height))
+
+        # Position of the mower
+        self.rect = self.image.get_rect(topleft=pos)
+
+    def update_position(self, new_pos):
+        self.rect.topleft = new_pos
 
 class PIP_Example_Tiles(AbstractGameScreen):
     """The file /simulation/example_tiles.py, but modified to be compatible with the PIP version of the simulation."""
     def __init__(self, width=800, height=800):
+        pygame.display.set_mode((width, height))  # Create display first
+
         self.WIDTH = width
         self.HEIGHT = height
         self.metrics = Metrics()
@@ -32,6 +51,42 @@ class PIP_Example_Tiles(AbstractGameScreen):
         # Set width and height of the cells in the grid
         self.cell_width = self.WIDTH // self.cols
         self.cell_height = self.HEIGHT // self.rows
+
+        # Load sprites for lawn tiles and mower, and scale them to fit each tile
+        self.tile_sprites = {
+            LawnState.UNMOWED: pygame.transform.scale(
+                pygame.image.load(os.path.join(ASSET_PATH, "unmowed.png")).convert_alpha(),
+                (self.cell_width, self.cell_height)
+            ),
+            LawnState.MOWED: pygame.transform.scale(
+                pygame.image.load(os.path.join(ASSET_PATH, "mowed.png")).convert_alpha(),
+                (self.cell_width, self.cell_height)
+            ),
+            LawnState.TREE: pygame.transform.scale(
+                pygame.image.load(os.path.join(ASSET_PATH, "tree.png")).convert_alpha(),
+                (self.cell_width, self.cell_height)
+            ),
+            LawnState.ROCK: pygame.transform.scale(
+                pygame.image.load(os.path.join(ASSET_PATH, "rock.png")).convert_alpha(),
+                (self.cell_width, self.cell_height)
+            ),
+            LawnState.CONCRETE: pygame.transform.scale(
+                pygame.image.load(os.path.join(ASSET_PATH, "concrete.png")).convert_alpha(),
+                (self.cell_width, self.cell_height)
+            ),
+            LawnState.BASE: pygame.transform.scale(
+                pygame.image.load(os.path.join(ASSET_PATH, "base.png")).convert_alpha(),
+                (self.cell_width, self.cell_height)
+            ),
+        }
+
+        # Load and scale mower sprite
+        self.mower_sprite = MowerSprite(
+        os.path.join(ASSET_PATH, "mower.png"),
+        (0, 0),
+        self.cell_width,
+        self.cell_height
+        )
 
         # Position of the mower
         self.pos = (0, 0)
@@ -90,8 +145,9 @@ class PIP_Example_Tiles(AbstractGameScreen):
         if new_position != self.pos and not self.check_collision(new_position):
             self.update_lawn(new_position)
             self.pos = new_position
+            # Update mower sprite's position
+            self.mower_sprite.update_position((new_position[1] * self.cell_width, new_position[0] * self.cell_height))
 
-    # Draw the lawn
     def draw_lawn(self, screen):
         """
         Draw the lawn onto the given screen.
@@ -106,24 +162,12 @@ class PIP_Example_Tiles(AbstractGameScreen):
         screen.fill(colors["white"])
         for row_index, row in enumerate(self.grid.raw):
             for col_index, cell in enumerate(row):
-                if (row_index, col_index) == self.pos:
-                    color = colors["red"]
-                elif cell == LawnState.UNMOWED:
-                    color = colors["dark_green"]
-                elif cell == LawnState.MOWED:
-                    color = colors["light_green"]
-                elif cell == LawnState.TREE:
-                    color = colors["yellow"]
-                elif cell == LawnState.ROCK:
-                    color = colors["brown"]
-                elif cell == LawnState.CONCRETE:
-                    color = colors["grey"]
-                elif cell == LawnState.BASE:
-                    color = colors["blue"]
-                else:
-                    color = colors["black"]
+                tile_sprite = self.tile_sprites.get(cell, None)
+                if tile_sprite:
+                    screen.blit(tile_sprite, (col_index * self.cell_width, row_index * self.cell_height))
 
-                pygame.draw.rect(screen, color, (col_index * self.cell_width, row_index * self.cell_height, self.cell_width, self.cell_height))
+        # Draw the mower sprite on top of the grid
+        screen.blit(self.mower_sprite.image, self.mower_sprite.rect)
 
     def handle_keypress(self, event):
         """
@@ -171,3 +215,21 @@ class PIP_Example_Tiles(AbstractGameScreen):
             return True
         else:
             return False
+    
+    # Added this function to easily check status of lawn     
+    def check_lawn(self, row, col) -> bool:
+        if row < self.rows and col < self.cols and row >= 0 and col >= 0:
+            if self.grid.get_tile(col, row) == LawnState.UNMOWED:
+                return True
+        return False
+    
+    def check_entire_lawn(self) -> bool:
+        unmowed_num = 0
+        for row_index, row in enumerate(self.grid.raw):
+            for col_index, cell in enumerate(row):
+                if cell == LawnState.UNMOWED:
+                    unmowed_num += 1
+        if unmowed_num > 0:
+            return False
+        return True
+
