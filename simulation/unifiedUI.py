@@ -3,9 +3,11 @@ import pygame_gui
 try:
     from menuScreen import menuScreen
     from pip_example_tiles import PIP_Example_Tiles
+    from editorScreen import Editor
 except ImportError:
     from simulation.menuScreen import menuScreen
     from simulation.pip_example_tiles import PIP_Example_Tiles
+    from simulation.editorScreen import Editor
 # Define colors (stub)
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -25,8 +27,16 @@ class UnifiedUI:
     """
     def __init__(self, screen_width=800, screen_height=600, width_ratio=0.75, height_ratio=0.8):
         # Component objects
-        self.game_screen = PIP_Example_Tiles(screen_width * width_ratio, screen_height * height_ratio) # THIS IS MODULAR, you may load different games here.
-        self.menu_screen = menuScreen(screen_width, screen_height, width_ratio, height_ratio)
+        self.pip_example = PIP_Example_Tiles(screen_width * width_ratio, screen_height * height_ratio)
+        self.editor = Editor(screen_width, screen_height, width_ratio, height_ratio)
+        self.main_menu = menuScreen(screen_width, screen_height, width_ratio, height_ratio)
+
+        self.game_screen = self.pip_example # THIS IS MODULAR, you may load different games here.
+        self.menu_screen = self.main_menu
+        
+
+        self.current_screen = 'game'
+
 
         # Screen dimensions
         self.WIDTH = screen_width
@@ -77,18 +87,33 @@ class UnifiedUI:
                 if event.type == pygame.KEYDOWN:
                     self.game_screen.handle_keypress(event)
                     # self.game_screen.update_grid()
-                    if self.game_screen.mower_has_returned_home():
+                    if (self.current_screen == 'game') and self.game_screen.mower_has_returned_home():
                         running = False
                 if event.type == pygame_gui.UI_BUTTON_PRESSED:
-                    if event.ui_element == self.menu_screen.buttons_bottom[3]:  # Quit button was pressed
+                    if (self.current_screen == 'game') and (event.ui_element == self.menu_screen.buttons_bottom[3]):  # Quit button was pressed
                         running = False
+
+                    elif (self.current_screen == 'game') and (event.ui_element == self.menu_screen.buttons_right[0]):
+                        self.current_screen = 'editor'
+                        self.game_screen = self.editor
+                        self.menu_screen = self.editor
+
+                    elif self.current_screen == 'editor' and event.ui_element.text == "Main Menu":
+                        self.current_screen = 'game'
+                        self.game_screen = self.pip_example
+                        self.menu_screen = self.main_menu
+
                     # HANDLE ALL OTHER SCENARIOS
-                    else: self.handle_button_press(event)
+                    else: self.menu_screen.handle_button_press(event)
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if self.current_screen == 'editor':
+                        self.game_screen.handle_click(event.pos)
 
             # Pass events to Pygame GUI manager
             self.menu_screen.ui_manager.process_events(event)
 
             # --- Rendering ---
+            
             self.game_screen.draw_lawn(self.game_surface)
             self.gui_surface.fill((0, 0, 0, 0))  # Clear with transparency
             self.menu_screen.draw_menu(self.gui_surface) # Draw the menu
@@ -98,6 +123,7 @@ class UnifiedUI:
             self.screen.blit(self.game_surface)  # Load game in the GUI frame
             self.screen.blit(self.gui_surface)  # Overlay GUI
 
+                
             # Update display
             pygame.display.flip()
 

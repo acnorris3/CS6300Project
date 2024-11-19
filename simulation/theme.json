@@ -1,0 +1,16 @@
+{
+  "button": {
+    "colours": {
+      "normal_bg": "#00000000",
+      "hovered_bg": "#00000000",
+      "active_bg": "#00000000"
+    }
+  },
+  "color_button": {
+    "colours": {
+      "normal_bg": "#00000000",
+      "hovered_bg": "#00000000",
+      "active_bg": "#00000000"
+    }
+  }
+}
