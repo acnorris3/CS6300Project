@@ -171,3 +171,9 @@ class PIP_Example_Tiles(AbstractGameScreen):
             return True
         else:
             return False
+    # Added this function to easily check status of lawn     
+    def check_lawn(self, row, col) -> bool:
+        if row < self.rows and col < self.cols and row >= 0 and col >= 0:
+            if self.grid.get_tile(col, row) == LawnState.UNMOWED:
+                return True
+        return False 
