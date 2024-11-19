@@ -1,18 +1,41 @@
-import pygame
-import sys
 import os
+import sys
+import pygame
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 try:
     from colors import colors
+    from game_screen.abstract_game_screen import AbstractGameScreen
 except ImportError:
     from simulation.colors import colors
-from lawn.lawn_states import LawnState
+    from simulation.game_screen.abstract_game_screen import AbstractGameScreen
 import csv
+from lawn.lawn import Lawn
+from lawn.lawn_states import LawnState
 from mower.metrics.Metrics import Metrics
 
-class PIP_Example_Tiles:
+# Initialize Pygame and set up asset paths
+pygame.init()
+ASSET_PATH = "./assets/"
+
+class MowerSprite(pygame.sprite.Sprite):
+    def __init__(self, image_path, pos, width, height):
+        super().__init__()
+
+        # Load image and scale to the specified tile size
+        original_image = pygame.image.load(image_path).convert_alpha()
+        self.image = pygame.transform.scale(original_image, (width, height))
+
+        # Position of the mower
+        self.rect = self.image.get_rect(topleft=pos)
+
+    def update_position(self, new_pos):
+        self.rect.topleft = new_pos
+
+class PIP_Example_Tiles(AbstractGameScreen):
     """The file /simulation/example_tiles.py, but modified to be compatible with the PIP version of the simulation."""
     def __init__(self, width=800, height=800):
+        pygame.display.set_mode((width, height))  # Create display first
+
         self.WIDTH = width
         self.HEIGHT = height
         self.metrics = Metrics()
@@ -20,23 +43,56 @@ class PIP_Example_Tiles:
         self.fLeftStart = False # Keep track if mower has left the base
 
         # Load the lawn from CSV file
-        self.grid = []
-        with open('./lawn/example_lawn_1.csv', 'r') as f:
-            reader = csv.reader(f)
-            for row in reader:
-                self.grid.append([LawnState(int(cell)) for cell in row])
-        self.rows = len(self.grid)
-        self.cols = len(self.grid[0])
+        self.grid = Lawn()
+        self.grid.load_from_file('./lawn/example_lawn_1.csv')
+        self.rows = self.grid.height
+        self.cols = self.grid.width
 
         # Set width and height of the cells in the grid
         self.cell_width = self.WIDTH // self.cols
         self.cell_height = self.HEIGHT // self.rows
 
+        # Load sprites for lawn tiles and mower, and scale them to fit each tile
+        self.tile_sprites = {
+            LawnState.UNMOWED: pygame.transform.scale(
+                pygame.image.load(os.path.join(ASSET_PATH, "unmowed.png")).convert_alpha(),
+                (self.cell_width, self.cell_height)
+            ),
+            LawnState.MOWED: pygame.transform.scale(
+                pygame.image.load(os.path.join(ASSET_PATH, "mowed.png")).convert_alpha(),
+                (self.cell_width, self.cell_height)
+            ),
+            LawnState.TREE: pygame.transform.scale(
+                pygame.image.load(os.path.join(ASSET_PATH, "tree.png")).convert_alpha(),
+                (self.cell_width, self.cell_height)
+            ),
+            LawnState.ROCK: pygame.transform.scale(
+                pygame.image.load(os.path.join(ASSET_PATH, "rock.png")).convert_alpha(),
+                (self.cell_width, self.cell_height)
+            ),
+            LawnState.CONCRETE: pygame.transform.scale(
+                pygame.image.load(os.path.join(ASSET_PATH, "concrete.png")).convert_alpha(),
+                (self.cell_width, self.cell_height)
+            ),
+            LawnState.BASE: pygame.transform.scale(
+                pygame.image.load(os.path.join(ASSET_PATH, "base.png")).convert_alpha(),
+                (self.cell_width, self.cell_height)
+            ),
+        }
+
+        # Load and scale mower sprite
+        self.mower_sprite = MowerSprite(
+        os.path.join(ASSET_PATH, "mower.png"),
+        (0, 0),
+        self.cell_width,
+        self.cell_height
+        )
+
         # Position of the mower
         self.pos = (0, 0)
 
     # Update position of the mower and update the status of the lawn
-    def update_grid(self, new_position):
+    def update_lawn(self, new_position):
         """
         Update the grid based on the current position of the mower.
 
@@ -45,24 +101,37 @@ class PIP_Example_Tiles:
         """
         row, col = new_position
         
-        if self.grid[row][col] == LawnState.UNMOWED:
-            self.grid[row][col] = LawnState.MOWED
-            if (self.grid[row][col] != LawnState.BASE):
+        if self.grid.get_tile(col, row) == LawnState.UNMOWED:
+            self.grid.update_tile(col, row, LawnState.MOWED)
+            if (self.grid.get_tile(col, row) != LawnState.BASE):
                 self.metrics.add_mowed()
         else:
-            if (self.grid[row][col] != LawnState.BASE):
+            if (self.grid.get_tile(col, row) != LawnState.BASE):
                 self.metrics.add_overlap()
 
             
     def check_collision(self, new_position):
+        """
+        Check if the mower has collided with an object on the lawn.
+
+        :param new_position: The new position of the mower.
+        :return: True if the mower has collided with an object, False otherwise.
+        """
+        
         row, col = new_position
-        if self.grid[row][col] in [LawnState.TREE, LawnState.ROCK]:
+        if self.grid.get_tile(col, row) in [LawnState.TREE, LawnState.ROCK]:
             print('Collision!')
             self.metrics.add_collision()
             return True
         return False
     
     def move_mower(self, direction):
+        """
+        Move the mower in the given direction, if a valid move.
+
+        :param direction: The direction in which the mower should move."""
+        new_position = self.pos 
+
         if direction == 'UP' and self.pos[0] > 0:
             new_position = (self.pos[0] - 1, self.pos[1])
         elif direction == 'DOWN' and self.pos[0] < self.rows - 1:
@@ -71,12 +140,14 @@ class PIP_Example_Tiles:
             new_position = (self.pos[0], self.pos[1] - 1)
         elif direction == 'RIGHT' and self.pos[1] < self.cols - 1:
             new_position = (self.pos[0], self.pos[1] + 1)
-            
-        if not self.check_collision(new_position):
-            self.update_grid(new_position)
-            self.pos = new_position
+        
 
-    # Draw the lawn
+        if new_position != self.pos and not self.check_collision(new_position):
+            self.update_lawn(new_position)
+            self.pos = new_position
+            # Update mower sprite's position
+            self.mower_sprite.update_position((new_position[1] * self.cell_width, new_position[0] * self.cell_height))
+
     def draw_lawn(self, screen):
         """
         Draw the lawn onto the given screen.
@@ -89,26 +160,14 @@ class PIP_Example_Tiles:
         :param screen: The surface to draw the lawn onto. At time of writing, this should be defined in a UnifiedUI object.
         """
         screen.fill(colors["white"])
-        for row_index, row in enumerate(self.grid):
+        for row_index, row in enumerate(self.grid.raw):
             for col_index, cell in enumerate(row):
-                if (row_index, col_index) == self.pos:
-                    color = colors["red"]
-                elif cell == LawnState.UNMOWED:
-                    color = colors["dark_green"]
-                elif cell == LawnState.MOWED:
-                    color = colors["light_green"]
-                elif cell == LawnState.TREE:
-                    color = colors["yellow"]
-                elif cell == LawnState.ROCK:
-                    color = colors["brown"]
-                elif cell == LawnState.CONCRETE:
-                    color = colors["grey"]
-                elif cell == LawnState.BASE:
-                    color = colors["blue"]
-                else:
-                    color = colors["black"]
+                tile_sprite = self.tile_sprites.get(cell, None)
+                if tile_sprite:
+                    screen.blit(tile_sprite, (col_index * self.cell_width, row_index * self.cell_height))
 
-                pygame.draw.rect(screen, color, (col_index * self.cell_width, row_index * self.cell_height, self.cell_width, self.cell_height))
+        # Draw the mower sprite on top of the grid
+        screen.blit(self.mower_sprite.image, self.mower_sprite.rect)
 
     def handle_keypress(self, event):
         """
@@ -156,3 +215,9 @@ class PIP_Example_Tiles:
             return True
         else:
             return False
+    # Added this function to easily check status of lawn     
+    def check_lawn(self, row, col) -> bool:
+        if row < self.rows and col < self.cols and row >= 0 and col >= 0:
+            if self.grid.get_tile(col, row) == LawnState.UNMOWED:
+                return True
+        return False 

@@ -1,5 +1,6 @@
 import pygame
 import pygame_gui
+import time
 try:
     from menuScreen import menuScreen
     from pip_example_tiles import PIP_Example_Tiles
@@ -25,7 +26,7 @@ class UnifiedUI:
     :param width_ratio: The fraction of the window width allocated to the game screen.
     :param height_ratio: The fraction of the window height allocated to the game screen.
     """
-    def __init__(self, screen_width=800, screen_height=600, width_ratio=0.75, height_ratio=0.8):
+    def __init__(self, game_instance, menu_instance, screen_width=800, screen_height=600, width_ratio=0.75, height_ratio=0.8):
         # Component objects
         self.pip_example = PIP_Example_Tiles(screen_width * width_ratio, screen_height * height_ratio)
         self.editor = Editor(screen_width, screen_height, width_ratio, height_ratio)
@@ -33,6 +34,9 @@ class UnifiedUI:
 
         self.game_screen = self.pip_example # THIS IS MODULAR, you may load different games here.
         self.menu_screen = self.main_menu
+
+        # self.game_screen = game_instance(screen_width * width_ratio, screen_height * height_ratio) # THIS IS MODULAR, you may load different games here.
+        # self.menu_screen = menu_instance(screen_width, screen_height, width_ratio, height_ratio)
         
 
         self.current_screen = 'game'
@@ -54,6 +58,31 @@ class UnifiedUI:
         game_surface_height = int(self.HEIGHT * self.HEIGHT_RATIO) # 80% of the screen height
         self.game_surface = pygame.Surface((game_surface_width, game_surface_height))
         self.gui_surface = pygame.Surface(window_size, pygame.SRCALPHA)  # Supports transparency
+
+
+    def start_move(self, key):
+        event = pygame.event.Event(pygame.KEYDOWN, key=key)
+        pygame.event.post(event)
+        time.sleep(0.25)
+
+    def auto_move(self):
+        print(self.game_screen.pos)
+        if self.game_screen.check_lawn(self.game_screen.pos[0], self.game_screen.pos[1] + 1) and self.game_screen.pos[1] < self.game_screen.cols - 1:
+            self.start_move(pygame.K_d)
+        elif self.game_screen.check_lawn(self.game_screen.pos[0] + 1, self.game_screen.pos[1]) and self.game_screen.pos[0] < self.game_screen.rows - 1:
+            self.start_move(pygame.K_s)
+        elif self.game_screen.check_lawn(self.game_screen.pos[0], self.game_screen.pos[1] - 1) and self.game_screen.pos[1] > - 1:
+            self.start_move(pygame.K_a)
+        elif self.game_screen.check_lawn(self.game_screen.pos[0] - 1, self.game_screen.pos[1]) and self.game_screen.pos[0] > -1:
+            self.start_move(pygame.K_w)
+        # Optimization will go here
+        # TODO: Have default movements be based on home position
+        else:
+            self.start_move(pygame.K_w)
+            # This results in some weird movement
+            if self.game_screen.pos[0] == 0:
+                self.start_move(pygame.K_a)         
+
 
 
     def main_loop(self): # Main game loop
@@ -83,12 +112,13 @@ class UnifiedUI:
             for event in pygame.event.get():
                 # CHECK FOR QUIT
                 if event.type == pygame.QUIT:
-                    running = False
-                if event.type == pygame.KEYDOWN:
+                    running = False                                        
+                if event.type == pygame.KEYDOWN:                                  
                     self.game_screen.handle_keypress(event)
-                    # self.game_screen.update_grid()
+                    self.auto_move()
+                    # self.game_screen.update_lawn()
                     if (self.current_screen == 'game') and self.game_screen.mower_has_returned_home():
-                        running = False
+                        running = False 
                 if event.type == pygame_gui.UI_BUTTON_PRESSED:
                     if (self.current_screen == 'game') and (event.ui_element == self.menu_screen.buttons_bottom[3]):  # Quit button was pressed
                         running = False

@@ -2,8 +2,12 @@
 
 import pygame
 import pygame_gui
+try:
+    from menu_screen.abstract_menu_screen import AbstractMenuScreen
+except ImportError:
+    from simulation.menu_screen.abstract_menu_screen import AbstractMenuScreen
 
-class menuScreen:
+class menuScreen(AbstractMenuScreen):
     def __init__(self, screen_width=800, screen_height=600, width_ratio=0.75, height_ratio=0.8):
         """
         Initializes the menuScreen class with the specified screen dimensions and layout configuration.
