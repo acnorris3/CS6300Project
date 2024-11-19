@@ -178,6 +178,7 @@ class PIP_Example_Tiles(AbstractGameScreen):
             if self.grid.get_tile(col, row) == LawnState.UNMOWED:
                 return True
         return False
+    
     def check_entire_lawn(self) -> bool:
         unmowed_num = 0
         for row_index, row in enumerate(self.grid.raw):
