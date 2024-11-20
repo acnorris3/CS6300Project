@@ -77,7 +77,7 @@ class UnifiedUI:
         time.sleep(0.25)
 
     def auto_move(self):
-        print(self.game_screen.pos)
+        #print(self.game_screen.pos)
         if self.game_screen.check_lawn(self.game_screen.pos[0], self.game_screen.pos[1] + 1) and self.game_screen.pos[1] < self.game_screen.cols - 1:
             self.start_move(pygame.K_d)
         elif self.game_screen.check_lawn(self.game_screen.pos[0] + 1, self.game_screen.pos[1]) and self.game_screen.pos[0] < self.game_screen.rows - 1:
@@ -86,13 +86,12 @@ class UnifiedUI:
             self.start_move(pygame.K_a)
         elif self.game_screen.check_lawn(self.game_screen.pos[0] - 1, self.game_screen.pos[1]) and self.game_screen.pos[0] > -1:
             self.start_move(pygame.K_w)
-        # Optimization will go here
         # TODO: Have default movements be based on home position
-        else:
-            self.start_move(pygame.K_w)
-            # This results in some weird movement
-            if self.game_screen.pos[0] == 0:
-                self.start_move(pygame.K_a)         
+        elif self.game_screen.check_entire_lawn:
+            if self.game_screen.pos[0] > 0:
+                self.start_move(pygame.K_w)
+            elif self.game_screen.pos[1] > 0:
+                self.start_move(pygame.K_a)      
 
 
 
@@ -123,7 +122,7 @@ class UnifiedUI:
             for event in pygame.event.get():
                 # CHECK FOR QUIT
                 if event.type == pygame.QUIT:
-                    running = False                                        
+                    running = False                                  
                 if event.type == pygame.KEYDOWN:                                  
                     self.game_screen.handle_keypress(event)
                     self.auto_move()
