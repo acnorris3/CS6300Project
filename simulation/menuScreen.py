@@ -56,7 +56,7 @@ class menuScreen(AbstractMenuScreen):
         right_button_width = 150
         right_button_height = 40
         right_button_x = self.screen_width - right_button_width - 10
-        right_button_labels = ["Create Lawn", "Load Lawn 1", "Load Lawn 2", "Load Lawn 3"]
+        right_button_labels = ["Create Lawn", "Load Lawn 1", "Load Lawn 2", "Load Lawn 3", "Load Custom Lawn"]
         self.buttons_right = [
             pygame_gui.elements.UIButton(
                 relative_rect=pygame.Rect(right_button_x, 10 + i * (right_button_height + 20), 

@@ -1,6 +1,9 @@
+import os
 import pygame
 import pygame_gui
 import time
+from tkinter import Tk
+from tkinter.filedialog import askopenfilename
 try:
     from menuScreen import menuScreen
     from pip_example_tiles import PIP_Example_Tiles
@@ -58,6 +61,14 @@ class UnifiedUI:
         game_surface_height = int(self.HEIGHT * self.HEIGHT_RATIO) # 80% of the screen height
         self.game_surface = pygame.Surface((game_surface_width, game_surface_height))
         self.gui_surface = pygame.Surface(window_size, pygame.SRCALPHA)  # Supports transparency
+
+    def open_file_explorer(self):
+        root = Tk()
+        root.withdraw()
+        root_directory = os.path.dirname(os.path.abspath(__file__))
+        file_path = askopenfilename(initialdir=root_directory, title="Select a file", filetypes=[("CSV files", "*.csv")])
+        root.destroy()
+        return file_path
 
 
     def start_move(self, key):
@@ -120,18 +131,22 @@ class UnifiedUI:
                     if (self.current_screen == 'game') and self.game_screen.mower_has_returned_home():
                         running = False 
                 if event.type == pygame_gui.UI_BUTTON_PRESSED:
-                    if (self.current_screen == 'game') and (event.ui_element == self.menu_screen.buttons_bottom[3]):  # Quit button was pressed
-                        running = False
-
-                    elif (self.current_screen == 'game') and (event.ui_element == self.menu_screen.buttons_right[0]):
-                        self.current_screen = 'editor'
-                        self.game_screen = self.editor
-                        self.menu_screen = self.editor
-
-                    elif self.current_screen == 'editor' and event.ui_element.text == "Main Menu":
-                        self.current_screen = 'game'
-                        self.game_screen = self.pip_example
-                        self.menu_screen = self.main_menu
+                    if self.current_screen == 'game':
+                        if event.ui_element == self.menu_screen.buttons_bottom[3]:  # Quit button was pressed
+                            running = False
+                        elif event.ui_element == self.menu_screen.buttons_right[0]: # Create new lawn button pressed
+                            self.current_screen = 'editor'
+                            self.game_screen = self.editor
+                            self.menu_screen = self.editor
+                        elif event.ui_element == self.menu_screen.buttons_right[4]: # Load user lawn
+                            file_path = self.open_file_explorer()
+                            if file_path:
+                                print(file_path)
+                    elif self.current_screen == 'editor':
+                        if event.ui_element.text == "Main Menu":
+                            self.current_screen = 'game'
+                            self.game_screen = self.pip_example
+                            self.menu_screen = self.main_menu
 
                     # HANDLE ALL OTHER SCENARIOS
                     else: self.menu_screen.handle_button_press(event)

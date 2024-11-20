@@ -4,6 +4,8 @@ import sys
 import pygame
 import pygame_gui
 from datetime import datetime
+from tkinter import Tk
+from tkinter.filedialog import askopenfilename
 try:
     from colors import colors
 except ImportError:
