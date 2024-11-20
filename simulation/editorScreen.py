@@ -234,8 +234,8 @@ class Editor:
             root = Tk()
             root.withdraw()
 
-            directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'lawns')
-            file_path = asksaveasfilename(defaultextension='.csv', filetypes=[("CSV files", "*.csv")], initialdir=directory)
+            directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'lawns', 'custom')
+            file_path = asksaveasfilename(defaultextension='.csv', filetypes=[("CSV files", "*.csv")], initialdir=directory, initialfile="my_lawn", title="Save Grid")
             root.destroy()
 
             if not file_path:
