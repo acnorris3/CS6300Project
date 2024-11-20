@@ -5,7 +5,7 @@ import pygame
 import pygame_gui
 from datetime import datetime
 from tkinter import Tk
-from tkinter.filedialog import askopenfilename
+from tkinter.filedialog import asksaveasfilename
 try:
     from colors import colors
 except ImportError:
@@ -224,31 +224,47 @@ class Editor:
     def save(self):
         """
         Saves the current grid to a CSV file in the 'lawns' directory.
-        The filename is generated based on the current date and time in the format
-        'custom_lawn_YYYY-MM-DD_HH-MM-SS.csv'. If the directory does not exist, it
-        will be created.
+        User is prompted to select the file name and location.
         Raises:
             Exception: If an error occurs while saving the grid.
         Prints:
             A message indicating the file path where the grid was saved or an error message if saving fails.
         """
-        directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'lawns')
-        os.makedirs(directory, exist_ok=True)
-
-        now = datetime.now()
-        current_time = now.strftime("%Y-%m-%d_%H-%M-%S")
-        filename = f"custom_lawn_{current_time}.csv"
-        file_path = os.path.join(directory, filename)
-    
         try:
+            root = Tk()
+            root.withdraw()
+
+            directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'lawns')
+            file_path = asksaveasfilename(defaultextension='.csv', filetypes=[("CSV files", "*.csv")], initialdir=directory)
+            root.destroy()
+
+            if not file_path:
+                print("Save operation cancelled.")
+                self.display_success_message("Save cancelled.")
+                return
+            
             with open(file_path, mode='w', newline='') as file:
                 writer = csv.writer(file)
                 for row in self.grid:
                     writer.writerow(row)
-            
+
+            self.display_success_message("Grid saved successfully.")
             print(f"Grid saved to {file_path}")
         except Exception as e:
-            print(f"An error occurred while saving the grid: {e}")
+            print(f"An error occurred while saving the file: {e}")
+            self.display_success_message("Error saving file. Please try again.")
+            return
+        
+    
+    def display_success_message(self, message):
+        # Create a pop-up message using pygame_gui
+        self.success_message = pygame_gui.elements.ui_text_box.UITextBox(
+            html_text=message,
+            relative_rect=pygame.Rect((self.screen_width // 2 - 100, self.screen_height // 2 - 50), (200, 100)),
+            manager=self.ui_manager
+        )
+        # Display the message for a short duration
+        pygame.time.set_timer(pygame.USEREVENT, 2000)
 
     def handle_keypress(self, event):
         pass    # Placeholder for now

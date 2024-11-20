@@ -33,7 +33,7 @@ class MowerSprite(pygame.sprite.Sprite):
 
 class PIP_Example_Tiles(AbstractGameScreen):
     """The file /simulation/example_tiles.py, but modified to be compatible with the PIP version of the simulation."""
-    def __init__(self, width=800, height=800):
+    def __init__(self, width=800, height=800, file_path='./lawn/example_lawn_1.csv'):
         pygame.display.set_mode((width, height))  # Create display first
 
         self.WIDTH = width
@@ -44,7 +44,7 @@ class PIP_Example_Tiles(AbstractGameScreen):
 
         # Load the lawn from CSV file
         self.grid = Lawn()
-        self.grid.load_from_file('./lawn/example_lawn_1.csv')
+        self.grid.load_from_file(file_path)
         self.rows = self.grid.height
         self.cols = self.grid.width
 

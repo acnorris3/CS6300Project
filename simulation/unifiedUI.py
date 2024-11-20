@@ -66,7 +66,8 @@ class UnifiedUI:
         root = Tk()
         root.withdraw()
         root_directory = os.path.dirname(os.path.abspath(__file__))
-        file_path = askopenfilename(initialdir=root_directory, title="Select a file", filetypes=[("CSV files", "*.csv")])
+        directory = os.path.join(root_directory, '..', 'lawns', 'custom')
+        file_path = askopenfilename(initialdir=directory, title="Select a file", filetypes=[("CSV files", "*.csv")])
         root.destroy()
         return file_path
 
@@ -137,15 +138,32 @@ class UnifiedUI:
                             self.current_screen = 'editor'
                             self.game_screen = self.editor
                             self.menu_screen = self.editor
+                        elif event.ui_element == self.menu_screen.buttons_right[1]: # Load lawn 1
+                            self.game_screen = PIP_Example_Tiles(self.WIDTH * self.WIDTH_RATIO, self.HEIGHT * self.HEIGHT_RATIO, 'lawns/preset/lawn1.csv')
+                            self.menu_screen = menuScreen(self.WIDTH, self.HEIGHT, self.WIDTH_RATIO, self.HEIGHT_RATIO)  # Reinitialize menuScreen
+                            self.display_success_message("Lawn 1 loaded successfully!")
+                        elif event.ui_element == self.menu_screen.buttons_right[2]: # Load lawn 2
+                            self.game_screen = PIP_Example_Tiles(self.WIDTH * self.WIDTH_RATIO, self.HEIGHT * self.HEIGHT_RATIO, 'lawns/preset/lawn2.csv')
+                            self.menu_screen = menuScreen(self.WIDTH, self.HEIGHT, self.WIDTH_RATIO, self.HEIGHT_RATIO)  # Reinitialize menuScreen
+                            self.display_success_message("Lawn 2 loaded successfully!")
+                        elif event.ui_element == self.menu_screen.buttons_right[3]: # Load lawn 3
+                            self.game_screen = PIP_Example_Tiles(self.WIDTH * self.WIDTH_RATIO, self.HEIGHT * self.HEIGHT_RATIO, 'lawns/preset/lawn3.csv')
+                            self.menu_screen = menuScreen(self.WIDTH, self.HEIGHT, self.WIDTH_RATIO, self.HEIGHT_RATIO)  # Reinitialize menuScreen
+                            self.display_success_message("Lawn 3 loaded successfully!")
                         elif event.ui_element == self.menu_screen.buttons_right[4]: # Load user lawn
                             file_path = self.open_file_explorer()
                             if file_path:
-                                print(file_path)
+                                self.game_screen = PIP_Example_Tiles(self.WIDTH * self.WIDTH_RATIO, self.HEIGHT * self.HEIGHT_RATIO, file_path)
+                                self.menu_screen = menuScreen(self.WIDTH, self.HEIGHT, self.WIDTH_RATIO, self.HEIGHT_RATIO)  # Reinitialize menuScreen
+                                self.display_success_message("User lawn loaded successfully!")
+                                
                     elif self.current_screen == 'editor':
                         if event.ui_element.text == "Main Menu":
                             self.current_screen = 'game'
                             self.game_screen = self.pip_example
                             self.menu_screen = self.main_menu
+                        else: 
+                            self.menu_screen.handle_button_press(event)
 
                     # HANDLE ALL OTHER SCENARIOS
                     else: self.menu_screen.handle_button_press(event)
@@ -153,14 +171,19 @@ class UnifiedUI:
                     if self.current_screen == 'editor':
                         self.game_screen.handle_click(event.pos)
 
+            if event.type == pygame.USEREVENT:
+                if hasattr(self, 'success_message'):
+                    self.success_message.kill()
+                    del self.success_message
+
             # Pass events to Pygame GUI manager
             self.menu_screen.ui_manager.process_events(event)
 
             # --- Rendering ---
             
-            self.game_screen.draw_lawn(self.game_surface)
             self.gui_surface.fill((0, 0, 0, 0))  # Clear with transparency
             self.menu_screen.draw_menu(self.gui_surface) # Draw the menu
+            self.game_screen.draw_lawn(self.game_surface)
 
             # Combine surfaces
             self.screen.fill(BLACK)  # Clear the screen
@@ -179,3 +202,13 @@ class UnifiedUI:
         if event.ui_element == self.menu_screen.buttons_bottom[3]:  # Quit button was pressed
                 running = False  # Close the program
                 # ^ This doesn't work because we're not in the main loop.
+
+    def display_success_message(self, message):
+        # Create a pop-up message using pygame_gui
+        self.success_message = pygame_gui.elements.ui_text_box.UITextBox(
+            html_text=message,
+            relative_rect=pygame.Rect((self.WIDTH // 2 - 100, self.HEIGHT // 2 - 50), (200, 100)),
+            manager=self.menu_screen.ui_manager
+        )
+        # Display the message for a short duration
+        pygame.time.set_timer(pygame.USEREVENT, 2000)
