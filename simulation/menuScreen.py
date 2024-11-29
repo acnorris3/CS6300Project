@@ -42,7 +42,7 @@ class menuScreen(AbstractMenuScreen):
         button_spacing = 20
 
         button_y = self.screen_height - button_height - 10
-        button_labels = ["Start", "Pause", "Stop", "Quit"]
+        button_labels = ["Start", "Pause", "Reset", "Quit"]
         for i, label in enumerate(button_labels):
             button_x = 10 + i * (button_width + button_spacing)
             button = pygame_gui.elements.UIButton(

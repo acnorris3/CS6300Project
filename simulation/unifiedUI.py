@@ -62,6 +62,9 @@ class UnifiedUI:
         self.game_surface = pygame.Surface((game_surface_width, game_surface_height))
         self.gui_surface = pygame.Surface(window_size, pygame.SRCALPHA)  # Supports transparency
 
+        # variables for tracking state
+        self.paused = False
+
     def open_file_explorer(self):
         root = Tk()
         root.withdraw()
@@ -124,7 +127,7 @@ class UnifiedUI:
                 # CHECK FOR QUIT
                 if event.type == pygame.QUIT:
                     running = False                                  
-                if event.type == pygame.KEYDOWN:                                  
+                if event.type == pygame.KEYDOWN and not self.paused:                                  
                     self.game_screen.handle_keypress(event)
                     self.auto_move()
                     # self.game_screen.update_lawn()
@@ -156,6 +159,8 @@ class UnifiedUI:
                                 self.game_screen = PIP_Example_Tiles(self.WIDTH * self.WIDTH_RATIO, self.HEIGHT * self.HEIGHT_RATIO, file_path)
                                 self.menu_screen = menuScreen(self.WIDTH, self.HEIGHT, self.WIDTH_RATIO, self.HEIGHT_RATIO)  # Reinitialize menuScreen
                                 self.display_success_message("User lawn loaded successfully!")
+                        else:
+                            self.handle_button_press(event)
                                 
                     elif self.current_screen == 'editor':
                         if event.ui_element.text == "Main Menu":
@@ -199,9 +204,16 @@ class UnifiedUI:
 
     def handle_button_press(self, event):
         """Currently just a stub, but as we add functionality to buttons not requiring access to the `running` variable, we can add it here."""
+        if event.ui_element == self.menu_screen.buttons_bottom[0]:  # Start button was pressed
+            self.paused = False
+            self.auto_move()
+        if event.ui_element == self.menu_screen.buttons_bottom[1]:  # Pause button was pressed
+            self.paused = True  # Close the program
+        if event.ui_element == self.menu_screen.buttons_bottom[2]:  # Stop button was pressed
+            pygame.quit()
+            UnifiedUI(game_instance=PIP_Example_Tiles, menu_instance=menuScreen).main_loop()
         if event.ui_element == self.menu_screen.buttons_bottom[3]:  # Quit button was pressed
-                running = False  # Close the program
-                # ^ This doesn't work because we're not in the main loop.
+            raise NotImplementedError("The `quit` button shouldn't be handled by the function `handle_button_press`.")
 
     def display_success_message(self, message):
         # Create a pop-up message using pygame_gui
