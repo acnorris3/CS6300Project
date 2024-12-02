@@ -74,30 +74,82 @@ class UnifiedUI:
         root.destroy()
         return file_path
 
-
+    
     def start_move(self, key):
         event = pygame.event.Event(pygame.KEYDOWN, key=key)
         pygame.event.post(event)
         time.sleep(0.25)
 
-    def auto_move(self):
-        #print(self.game_screen.pos)
-        if self.game_screen.check_lawn(self.game_screen.pos[0], self.game_screen.pos[1] + 1) and self.game_screen.pos[1] < self.game_screen.cols - 1:
+    def find_unmowed_lawn(self, pos, lawn_list):
+        reduced_list = []
+        for lawn in lawn_list:
+            if pos[0] == lawn[0] or pos[1] == lawn[1]:
+                reduced_list.append(lawn)
+        tar_pos = pos
+        if reduced_list:
+            target = 100000            
+            for lawn in reduced_list:
+                y = pos[0] - lawn[0]
+                x = pos[1] - lawn[1]
+                if y + x < target:
+                    target = y + x
+                    tar_pos = lawn
+        if not reduced_list:
+            target = 100000            
+            for lawn in lawn_list:
+                y = pos[0] - lawn[0]
+                x = pos[1] - lawn[1]
+                if y + x < target:
+                    target = y + x
+                    tar_pos = lawn
+        if not lawn_list: 
+            tar_pos = (0,0)
+        print(lawn_list)
+        if tar_pos[0] < pos[0] and self.game_screen.avoid_collision(pos[0] - 1, pos[1]):
+            return "w"      
+        if tar_pos[0] > pos[0] and self.game_screen.avoid_collision(pos[0] + 1, pos[1]):
+            return "s"
+        if tar_pos[1] > pos[1] and self.game_screen.avoid_collision(pos[0], pos[1] + 1):
+            return "d"        
+        if tar_pos[1] < pos[1] and self.game_screen.avoid_collision(pos[0], pos[1] - 1):
+            return "a"
+        if self.game_screen.avoid_collision(pos[0] - 1, pos[1]) and self.game_screen.valid_move(pos[0] - 1, pos[1]):
+            return "w"
+        if self.game_screen.avoid_collision(pos[0], pos[1] + 1) and self.game_screen.valid_move(pos[0], pos[1] + 1):
+            return "d"     
+        if self.game_screen.avoid_collision(pos[0], pos[1] - 1) and self.game_screen.valid_move(pos[0], pos[1] - 1):
+            return "a"
+        if self.game_screen.avoid_collision(pos[0] + 1, pos[1]) and self.game_screen.valid_move(pos[0] + 1, pos[1]):
+            return "s"
+         
+    
+    def check_neighbor_squares(self, pos):
+        if self.game_screen.check_lawn(pos[0], pos[1] + 1) and self.game_screen.avoid_collision(pos[0], pos[1] + 1):
+            return "d"
+        if self.game_screen.check_lawn(pos[0] + 1, pos[1]) and self.game_screen.avoid_collision(pos[0] + 1, pos[1]):
+            return "s"
+        if self.game_screen.check_lawn(pos[0], pos[1] - 1) and self.game_screen.avoid_collision(pos[0], pos[1] - 1):
+            return "a"
+        if self.game_screen.check_lawn(pos[0] - 1, pos[1]) and self.game_screen.avoid_collision(pos[0] - 1, pos[1]):
+            return "w"        
+        
+        lawn = self.game_screen.check_entire_lawn()
+        return self.find_unmowed_lawn(self.game_screen.pos, lawn)
+            
+
+
+    def auto_move(self):        
+        if self.check_neighbor_squares(self.game_screen.pos) == 'd':
             self.start_move(pygame.K_d)
-        elif self.game_screen.check_lawn(self.game_screen.pos[0] + 1, self.game_screen.pos[1]) and self.game_screen.pos[0] < self.game_screen.rows - 1:
+            
+        if self.check_neighbor_squares(self.game_screen.pos) == 's':
             self.start_move(pygame.K_s)
-        elif self.game_screen.check_lawn(self.game_screen.pos[0], self.game_screen.pos[1] - 1) and self.game_screen.pos[1] > - 1:
+        
+        if self.check_neighbor_squares(self.game_screen.pos) == 'a':
             self.start_move(pygame.K_a)
-        elif self.game_screen.check_lawn(self.game_screen.pos[0] - 1, self.game_screen.pos[1]) and self.game_screen.pos[0] > -1:
+            
+        if self.check_neighbor_squares(self.game_screen.pos) == 'w':
             self.start_move(pygame.K_w)
-        # TODO: Have default movements be based on home position
-        elif self.game_screen.check_entire_lawn:
-            if self.game_screen.pos[0] > 0:
-                self.start_move(pygame.K_w)
-            elif self.game_screen.pos[1] > 0:
-                self.start_move(pygame.K_a)      
-
-
 
     def main_loop(self): # Main game loop
         """

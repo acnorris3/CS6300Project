@@ -223,13 +223,27 @@ class PIP_Example_Tiles(AbstractGameScreen):
                 return True
         return False
     
-    def check_entire_lawn(self) -> bool:
-        unmowed_num = 0
-        for row_index, row in enumerate(self.grid.raw):
-            for col_index, cell in enumerate(row):
-                if cell == LawnState.UNMOWED:
-                    unmowed_num += 1
-        if unmowed_num > 0:
-            return False
+    def avoid_collision(self, row, col):
+        pos = (row,col)
+        if row < self.rows and col < self.cols and row >= 0 and col >= 0:
+            if self.grid.get_tile(col, row) == LawnState.ROCK or self.grid.get_tile(col, row) == LawnState.TREE:
+                return False
         return True
+
+    def check_entire_lawn(self) -> list:
+        unmowed_lawn = []
+        for row in range(self.rows):
+            for col in range(self.cols):
+                if self.grid.get_tile(col, row) == LawnState.UNMOWED:
+                    unmowed_lawn.append((row,col))
+        return unmowed_lawn
+
+    def valid_move(self, row, col) -> bool:
+        if row < self.rows and col < self.cols and row >= 0 and col >= 0:
+            if self.grid.get_tile(col, row) == LawnState.MOWED:
+                return True
+        return False
+
+                
+
 
