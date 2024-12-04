@@ -82,3 +82,15 @@ Like this [doc](/docs/how-to-add-pics.md) on how to add pictures to readme files
 ## Basic info about pygame and our specific use case of it.
 
 Please take a look at this [doc](/docs/pygame_basics.md)
+
+## Build executable
+
+Install pyinstaller
+```
+pip install pyinstaller
+```
+And then run this command. Note all the files added by the --add-data flag.
+
+```
+pyinstaller.exe --onefile .\main.py --add-data="lawns/custom/;lawns/custom/." --add-data="lawn/example_lawn_1.csv;lawn/." --add-data="assets/;assets/" --add-data="lawns/preset/*;lawns/preset/"
+```
